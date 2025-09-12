@@ -1,0 +1,5 @@
+curl-cffi
+flatten_json
+pandas
+colorama
+pyfiglet
