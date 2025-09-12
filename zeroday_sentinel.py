@@ -9,10 +9,14 @@ from pyfiglet import Figlet
 import time
 import re
 import webbrowser
-import time
+import platform
+import subprocess
+
 init(autoreset=True)
+
 def coloring(string, color=Fore.GREEN):
     return f"{color}{string}{Fore.RESET}"
+
 # === Animated Banner ===
 def animated_banner(text, font='poison', delay=0.0001):
     figlet = Figlet(font=font)
@@ -24,17 +28,13 @@ def animated_banner(text, font='poison', delay=0.0001):
         print()
 
 def print_banner():
-    project_name = "ZeroDay Sentinel"  # unexpected project name
+    project_name = "ZeroDay Sentinel"
     animated_banner(project_name, delay=0.0001)
     print(coloring("Author: cyb2rS2c\n", Fore.MAGENTA))
     print(coloring("Advanced CVE Fetcher\n", Fore.GREEN))
 
 # === CVE Utilities ===
 def list_available_cves(year, limit=100):
-    """
-    Generate a list of CVEs for the year and return only valid/existing ones.
-    Warning: checking many CVEs may take time due to API calls.
-    """
     valid_cves = []
     for i in range(1, limit + 1):
         cve_id = f"CVE-{year}-{i:04d}"
@@ -44,20 +44,15 @@ def list_available_cves(year, limit=100):
             if resp.status_code == 200:
                 valid_cves.append(cve_id)
         except Exception:
-            pass 
-        # Optional: stop early if you reach 10 valid CVEs
+            pass
         if len(valid_cves) >= 10:
             break
     return valid_cves
 
 def choose_cve(year, limit=100):
-    """
-    Let the user either enter a CVE manually or select from valid CVEs.
-    """
     print(coloring("Choose CVE input method:", Fore.YELLOW))
     print(coloring("1: Enter CVE ID manually", Fore.BLACK))
     print(coloring("2: Select from available CVEs", Fore.BLACK))
-
     while True:
         choice = input(coloring("Enter 1 or 2: ", Fore.BLACK)).strip()
         if choice == "1":
@@ -119,7 +114,6 @@ def get_unique_data(data):
 
 # === Hyperlink Coloring ===
 def color_hyperlinks(text):
-    # Detect URLs and color them blue
     url_pattern = re.compile(r'(https?://[^\s]+)')
     return url_pattern.sub(lambda m: coloring(m.group(0), Fore.BLUE), text)
 
@@ -137,7 +131,6 @@ def print_colored(data):
 # === Save Utilities ===
 def save_cve_data(flat_data, cve_id):
     unique_data, _ = print_colored(flat_data)
-
     json_filename = f"{cve_id}.json"
     csv_filename = f"{cve_id}.csv"
 
@@ -149,30 +142,37 @@ def save_cve_data(flat_data, cve_id):
     df.to_csv(csv_filename, index=False, encoding="utf-8")
     print(coloring(f"CSV saved to {csv_filename}", Fore.GREEN))
 
-def start_process(filename):
-    try:
-        os.startfile(filename)
-    except AttributeError:
-        print(coloring(f"Cannot open {filename} automatically on this OS.", Fore.RED))
+    return json_filename, csv_filename
 
+# === Open Files Cross-Platform ===
+def start_process(filename):
+    system_platform = platform.system()
+    try:
+        if system_platform == "Windows":
+            os.startfile(filename)
+        elif system_platform == "Linux":
+            subprocess.call(["xdg-open", filename])
+        elif system_platform == "Darwin":  # macOS
+            subprocess.call(["open", filename])
+        else:
+            print(coloring(f"Cannot open {filename} automatically on this OS.", Fore.RED))
+    except Exception as e:
+        print(coloring(f"Failed to open {filename}: {e}", Fore.RED))
+
+# === Open URLs after delay ===
 def open_cve_urls(flat_data, delay=10):
-    """
-    Extract URLs from CVE data and open them in the default browser after 'delay' seconds.
-    """
     urls = [v for k, v in flat_data.items() if k.lower().endswith("url") and v.startswith("http")]
     if not urls:
-        return  # no URLs found
+        return
 
     print(coloring(f"\nOpening {len(urls)} URL(s) in {delay} seconds...", Fore.YELLOW))
     time.sleep(delay)
-
     for url in urls:
         try:
             webbrowser.open(url)
             print(coloring(f"Opened URL: {url}", Fore.GREEN))
         except Exception as e:
             print(coloring(f"Failed to open URL {url}: {e}", Fore.RED))
-
 
 # === Main Execution ===
 def main():
@@ -187,14 +187,14 @@ def main():
         return
 
     flat_data = flatten_json_single(cve_data)
-    save_cve_data(flat_data, selected_cve)
+    json_file, csv_file = save_cve_data(flat_data, selected_cve)
 
-    # Open URLs in CVE data after 10 seconds
     open_cve_urls(flat_data, delay=10)
 
-    # Open local JSON and CSV files correctly
-    start_process(selected_cve + '.json')
-    start_process(selected_cve + '.csv')
+    start_process(json_file)
+    start_process(csv_file)
+
 
 if __name__ == "__main__":
     main()
+
