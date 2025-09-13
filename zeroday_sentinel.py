@@ -155,8 +155,8 @@ def start_process(filename):
 
         elif system_platform == "Linux":
             file_ext = os.path.splitext(filename)[1].lower()
-            editors_gui = ["code", "gedit", "kate", "xdg-open"]  # GUI apps
-            editors_cli = ["nano", "less", "vim"]  # CLI apps (for servers)
+            editors_gui = ["code", "gedit", "kate", "xdg-open"]  
+            editors_cli = ["nano", "less", "vim"]
 
             editor = next((e for e in editors_gui if shutil.which(e)), None)
             if editor:
