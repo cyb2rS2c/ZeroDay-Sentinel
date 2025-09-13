@@ -52,12 +52,12 @@ def list_available_cves(year, limit=100):
 
 def choose_cve(year, limit=100):
     print(coloring("Choose CVE input method:", Fore.YELLOW))
-    print(coloring("1: Enter CVE ID manually", Fore.BLACK))
-    print(coloring("2: Select from available CVEs", Fore.BLACK))
+    print(coloring("1: Enter CVE ID manually", Fore.MAGENTA))
+    print(coloring("2: Select from available CVEs", Fore.MAGENTA))
     while True:
-        choice = input(coloring("Enter 1 or 2: ", Fore.BLACK)).strip()
+        choice = input(coloring("Enter 1 or 2: ", Fore.MAGENTA)).strip()
         if choice == "1":
-            cve_id = input(coloring("Enter CVE ID (e.g., CVE-2025-0001): ", Fore.BLACK)).strip().upper()
+            cve_id = input(coloring("Enter CVE ID (e.g., CVE-2025-0001): ", Fore.BLUE)).strip().upper()
             return cve_id
         elif choice == "2":
             print(coloring("Fetching valid CVEs...", Fore.YELLOW))
@@ -74,9 +74,9 @@ def select_cve(cve_list, display_limit=10):
     while True:
         print(coloring("\nAvailable CVEs:", Fore.YELLOW))
         for i, cve in enumerate(cve_list[:n_display], 1):
-            print(coloring(f"{i}: {cve}", Fore.BLACK))
+            print(coloring(f"{i}: {cve}", Fore.CYAN))
         try:
-            cve_view = int(input(coloring(f"Enter the index of the CVE to view (1-{n_display}): ", Fore.BLACK)).strip())
+            cve_view = int(input(coloring(f"Enter the index of the CVE to view (1-{n_display}): ", Fore.CYAN)).strip())
             if 1 <= cve_view <= n_display:
                 return cve_list[cve_view - 1]
             print(coloring(f"Index out of range. Please enter a number between 1 and {n_display}.", Fore.RED))
@@ -124,7 +124,7 @@ def print_colored(data):
     output_strings = []
     for k, v in unique_data.items():
         v_colored = color_hyperlinks(str(v))
-        line = f"{coloring(k.split('_')[-1], Fore.BLACK)}: {v_colored}"
+        line = f"{coloring(k.split('_')[-1], Fore.YELLOW)}: {v_colored}"
         print(line)
         output_strings.append(line)
     return unique_data, "\n".join(output_strings)
