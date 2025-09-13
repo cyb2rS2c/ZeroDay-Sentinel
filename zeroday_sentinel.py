@@ -10,6 +10,7 @@ import time
 import re
 import webbrowser
 import platform
+import shutil
 import subprocess
 
 init(autoreset=True)
@@ -145,19 +146,38 @@ def save_cve_data(flat_data, cve_id):
     return json_filename, csv_filename
 
 # === Open Files Cross-Platform ===
+
 def start_process(filename):
     system_platform = platform.system()
     try:
         if system_platform == "Windows":
             os.startfile(filename)
+
         elif system_platform == "Linux":
-            subprocess.call(["xdg-open", filename])
+            file_ext = os.path.splitext(filename)[1].lower()
+            editors_gui = ["code", "gedit", "kate", "xdg-open"]  # GUI apps
+            editors_cli = ["nano", "less", "vim"]  # CLI apps (for servers)
+
+            editor = next((e for e in editors_gui if shutil.which(e)), None)
+            if editor:
+                subprocess.Popen([editor, filename])
+            else:
+                editor_cli = next((e for e in editors_cli if shutil.which(e)), None)
+                if editor_cli:
+                    subprocess.call([editor_cli, filename])
+                else:
+                    print(coloring(f"Cannot auto-open {filename}. Please open manually:", Fore.RED))
+                    print(coloring(f"  → cat {filename}", Fore.YELLOW))
+
         elif system_platform == "Darwin":  # macOS
-            subprocess.call(["open", filename])
+            subprocess.Popen(["open", filename])
+
         else:
             print(coloring(f"Cannot open {filename} automatically on this OS.", Fore.RED))
+
     except Exception as e:
         print(coloring(f"Failed to open {filename}: {e}", Fore.RED))
+
 
 # === Open URLs after delay ===
 def open_cve_urls(flat_data, delay=10):
@@ -167,13 +187,16 @@ def open_cve_urls(flat_data, delay=10):
 
     print(coloring(f"\nOpening {len(urls)} URL(s) in {delay} seconds...", Fore.YELLOW))
     time.sleep(delay)
+
+    # Try to use Firefox explicitly if available
+    firefox_path = shutil.which("firefox")
+    browser = webbrowser.get(f"firefox") if firefox_path else webbrowser
     for url in urls:
         try:
-            webbrowser.open(url)
+            browser.open(url)
             print(coloring(f"Opened URL: {url}", Fore.GREEN))
         except Exception as e:
             print(coloring(f"Failed to open URL {url}: {e}", Fore.RED))
-
 # === Main Execution ===
 def main():
     print_banner()
@@ -189,12 +212,12 @@ def main():
     flat_data = flatten_json_single(cve_data)
     json_file, csv_file = save_cve_data(flat_data, selected_cve)
 
+    # Open URLs found in the CVE data after a short delay
     open_cve_urls(flat_data, delay=10)
 
+    # Open JSON and CSV files based on the operating system
     start_process(json_file)
     start_process(csv_file)
 
-
 if __name__ == "__main__":
     main()
-
