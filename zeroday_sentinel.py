@@ -199,25 +199,29 @@ def open_cve_urls(flat_data, delay=10):
             print(coloring(f"Failed to open URL {url}: {e}", Fore.RED))
 # === Main Execution ===
 def main():
-    print_banner()
-    year = datetime.now().year
-    selected_cve = choose_cve(year, limit=1000)
+    try:
+        print_banner()
+        year = datetime.now().year
+        selected_cve = choose_cve(year, limit=1000)
+        if not selected_cve:
+            return  # user chose to quit
 
-    print(coloring(f"\nFetching data for {selected_cve}...", Fore.YELLOW))
-    cve_data = fetch_cve_data(selected_cve)
-    if not cve_data:
-        print(coloring("No data retrieved. Exiting.", Fore.RED))
+        print(coloring(f"\nFetching data for {selected_cve}...", Fore.YELLOW))
+        cve_data = fetch_cve_data(selected_cve)
+        if not cve_data:
+            print(coloring("No data retrieved. Exiting.", Fore.RED))
+            return
+
+        flat_data = flatten_json_single(cve_data)
+        json_file, csv_file = save_cve_data(flat_data, selected_cve)
+
+        open_cve_urls(flat_data, delay=10)
+        start_process(json_file)
+        start_process(csv_file)
+
+    except KeyboardInterrupt:
+        print("\n" + coloring("Process interrupted by user. Exiting.", Fore.RED))
         return
-
-    flat_data = flatten_json_single(cve_data)
-    json_file, csv_file = save_cve_data(flat_data, selected_cve)
-
-    # Open URLs found in the CVE data after a short delay
-    open_cve_urls(flat_data, delay=10)
-
-    # Open JSON and CSV files based on the operating system
-    start_process(json_file)
-    start_process(csv_file)
 
 if __name__ == "__main__":
     main()
