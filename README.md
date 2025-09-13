@@ -42,11 +42,14 @@ cd ZeroDay-Sentinel
 **Requirements:**
 - Python 3.8+
 ```bash (cmd)
+#windows
 python -m venv myvenv
 myvenv\Scripts\Activate.bat
 pip install -r requirements.txt
 ```
-```bash (Terminal)
+
+```bash
+#Terminal
 python -m venv myvenv
 source myvenv/bin/activate
 pip install -r requirements.txt
