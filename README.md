@@ -1,8 +1,9 @@
 # ZeroDay Sentinel
 
-**Author:** cyb2rS2c  
-**Version:** 1.0  
-**Date:** 2025  
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-green?logo=linux)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![Version](https://img.shields.io/badge/Version-1.0-orange)
 
 ---
 
@@ -77,7 +78,7 @@ python zeroday_sentinel.py
 
 
 
-## 📝 Author
+## Author
 
 cyb2rS2c - [GitHub Profile](https://github.com/cyb2rS2c)
 
