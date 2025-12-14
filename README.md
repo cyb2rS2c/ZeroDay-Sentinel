@@ -55,6 +55,10 @@ python -m venv myvenv
 source myvenv/bin/activate
 pip install -r requirements.txt
 ```
+## Installation (with pip)
+```
+pip install zeroday-sentinel
+```
 
 ## Usage
 1. Run the tool:
